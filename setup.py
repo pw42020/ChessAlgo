@@ -117,121 +117,104 @@ class GameEnv:
     # set to move the pieces
     def move(self,coords):
 
-        self.circles = []
-
         piece = self.pieces[coords]
-
-        if self.movenum % 2 == 0: 
-
-            if piece.name[0] == 'b':
-                pass
-
-            # IF PIECE IS WHITE
-            else:
-                # MOVEMENT FOR PAWN ** HAVE NOT IMPLEMENTED EN PASSANT YET**
-                if piece.name[1] == 'p':
                     
-                    # can move two pieces up if pawn hasn't moved
-                    if not piece.moved:
-                        for i in range(2):
-                            checkKey = (coords[0], coords[1] - i - 1)
+        
+        # PAWN MOVEMENT
+        if piece.name[1] == 'p':
 
-                            if checkKey not in self.pieces:
-                                self.circles.append(checkKey)
-                        piece.moved = True
+            #MOVEMENT FOR BLACK PIECES
+            if self.movenum % 2 == 1 and piece.name[0] == 'b': 
 
-                    if piece.moved:
-
-                        checkKey = (coords[0], coords[1] - 1)
+                # can move two pieces up if pawn hasn't moved
+                if not piece.moved:
+                    for i in range(2):
+                        checkKey = (coords[0], coords[1] + i + 1)
 
                         if checkKey not in self.pieces:
-                                self.circles.append(checkKey)
+                            self.circles.append(checkKey)
 
-                    # diagonal motion
-                    if (coords[0] - 1, coords[1] - 1) in self.pieces and self.pieces[(coords[0] - 1, coords[1] - 1)].name[0] == 'b':
-                        self.circles.append((coords[0] - 1, coords[1] - 1))
+                if piece.moved:
 
-                    if (coords[0] + 1, coords[1] - 1) in self.pieces and self.pieces[(coords[0] - 1, coords[1] - 1)].name[0] == 'b':
-                        self.circles.append((coords[0] + 1, coords[1] - 1))
+                    checkKey = (coords[0], coords[1] + 1)
+
+                    if checkKey not in self.pieces:
+                            self.circles.append(checkKey)
+
+                # diagonal motion
+                if (coords[0] - 1, coords[1] + 1) in self.pieces and self.pieces[(coords[0] - 1, coords[1] + 1)].name[0] == 'w':
+                    self.circles.append((coords[0] - 1, coords[1] + 1))
+
+                if (coords[0] + 1, coords[1] + 1) in self.pieces and self.pieces[(coords[0] + 1, coords[1] + 1)].name[0] == 'w':
+                    self.circles.append((coords[0] + 1, coords[1] + 1))
+
+            #MOVEMENT FOR WHITE PIECES
+            if self.movenum % 2 == 0 and piece.name[0] == 'w':
+                if not piece.moved:
+                    for i in range(2):
+                        checkKey = (coords[0], coords[1] - i - 1)
+
+                        if checkKey not in self.pieces:
+                            self.circles.append(checkKey)
+
+                if piece.moved:
+
+                    checkKey = (coords[0], coords[1] - 1)
+
+                    if checkKey not in self.pieces:
+                            self.circles.append(checkKey)
+
+                # diagonal motion
+                if (coords[0] - 1, coords[1] - 1) in self.pieces and self.pieces[(coords[0] - 1, coords[1] - 1)].name[0] == 'b':
+                    self.circles.append((coords[0] - 1, coords[1] - 1))
+
+                if (coords[0] + 1, coords[1] - 1) in self.pieces and self.pieces[(coords[0] + 1, coords[1] - 1)].name[0] == 'b':
+                    self.circles.append((coords[0] + 1, coords[1] - 1))
                 
-                # MOVEMENT FOR ROOK ** HAVE NOT IMPLEMENTED CASTLING YET **
-                if piece.name[1] == 'r':
+                
+        # MOVEMENTS FOR ALL PIECES OTHER THAN PAWN
+
+        '''
+        ----3 Conditions for movement----
+        1. If coordinate in front not in pieces dictionary
+        2. If piece is in pieces dictionary but is enemy piece
+        3. If piece is in pieces dictionary but is not enemy piece
+        '''
                     
-                    # four for loops for each straight direction
-
-                    # y direction
-                    for i in range(piece.coords[0],self.ROWS, 1):
-
-                        if (piece.coords[0] + i + 1, piece.coords[1]) not in self.pieces:
-                            self.circles.append((piece.coords[0] + i + 1, piece.coords[1]))
-
-                        if (piece.coords[0] + i + 1, piece.coords[1]) in self.pieces:
-                            break
-
-                    for i in range(self.ROWS - piece.coords[0],self.ROWS, 1):
-
-                        if (piece.coords[0] - i - 1, piece.coords[1]) not in self.pieces:
-                            self.circles.append((piece.coords[0] - i - 1, piece.coords[1]))
-
-                        if (piece.coords[0] - i - 1, piece.coords[1]) in self.pieces:
-                            break
 
 
+        # MOVEMENT FOR ROOK ** HAVE NOT IMPLEMENTED CASTLING YET **
+        if piece.name[1] == 'r':
+            
+            # four for loops for each straight direction
 
-                    # x direction
-                    for i in range(piece.coords[1],self.COLS, 1):
+            if (piece.name[0] == 'w' and self.movenum %2 == 0) or (piece.name[0] == 'b' and self.movenum % 2 == 1):
 
-                        if (piece.coords[0], piece.coords[1] + i + 1) not in self.pieces:
-                            self.circles.append((piece.coords[0], piece.coords[1] + i + 1))
+                self.circles = piece.straight(self.pieces)
 
-                        if (piece.coords[0], piece.coords[1] + i + 1) in self.pieces:
-                            break
+        if piece.name[1] == 'b':
+            
+            # four for loops for each straight direction
 
-                    for i in range(self.COLS - piece.coords[1],self.COLS, 1):
-                        if (piece.coords[0], piece.coords[1] - i - 1) not in self.pieces:
-                            self.circles.append((piece.coords[0], piece.coords[1] - i - 1))
+            if (piece.name[0] == 'w' and self.movenum %2 == 0) or (piece.name[0] == 'b' and self.movenum % 2 == 1):
 
-                        if (piece.coords[0], piece.coords[1] - i - 1) in self.pieces:
-                            break
+                self.circles = piece.diag(self.pieces)
 
+        if piece.name[1] == 'q':
+            
+            # four for loops for each straight direction
 
+            if (piece.name[0] == 'w' and self.movenum %2 == 0) or (piece.name[0] == 'b' and self.movenum % 2 == 1):
 
+                self.circles = piece.straight(self.pieces) + piece.diag(self.pieces)
 
-        #MOVEMENT FOR BLACK PIECES
-        if self.movenum % 2 == 1: 
+        if piece.name[1] == 'k':
+            
+            # four for loops for each straight direction
 
-            if piece.name[0] == 'w':
-                pass
+            if (piece.name[0] == 'w' and self.movenum %2 == 0) or (piece.name[0] == 'b' and self.movenum % 2 == 1):
 
-            else:
-                if piece.name[1] == 'p':
-                    # can move two pieces up if pawn hasn't moved
-                    if not piece.moved:
-                        for i in range(2):
-                            checkKey = (coords[0], coords[1] + i + 1)
-
-                            if checkKey not in self.pieces:
-                                self.circles.append(checkKey)
-                        piece.moved = True
-
-                    if piece.moved:
-
-                        checkKey = (coords[0], coords[1] + 1)
-
-                        if checkKey not in self.pieces:
-                                self.circles.append(checkKey)
-
-                    # diagonal motion
-                    if (coords[0] - 1, coords[1] + 1) in self.pieces and self.pieces[(coords[0] - 1, coords[1] - 1)].name[0] == 'b':
-                        self.circles.append((coords[0] - 1, coords[1] + 1))
-
-                    if (coords[0] + 1, coords[1] + 1) in self.pieces and self.pieces[(coords[0] - 1, coords[1] - 1)].name[0] == 'b':
-                        self.circles.append((coords[0] + 1, coords[1] + 1))
-
-
-
-
-
+                self.circles = piece.straight(self.pieces, 1, 1) + piece.diag(self.pieces, 1, 1)
 
 
 # after initpiece() initializes with self.fen, the pieces automate themselves and are refreshed remembering on where they
@@ -269,7 +252,7 @@ if __name__ == "__main__":
 
                 if len(env.circles) != 0:
 
-                    
+                    # taking piece
                     if (x,y) in env.circles:
 
                         env.pieces[initpos].coords = (x,y)
@@ -279,11 +262,20 @@ if __name__ == "__main__":
 
                         env.circles = []
                         env.movenum += 1
+
+                        env.pieces[(x,y)].moved = True
+
+                        print(env.pieces)
+                    
+                    else: # IMPORTANT: ALLOWS PLAYER TO PICK A NEW PIECE
+                        env.circles = []
                 
+                # choosing piece
                 if len(env.circles) == 0:
 
-                    initpos = (x,y)
-                    env.move((x,y))
+                    if (x,y) in env.pieces:
+                        initpos = (x,y)
+                        env.move((x,y))
 
         
         pygame.display.update()
