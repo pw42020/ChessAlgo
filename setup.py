@@ -214,7 +214,15 @@ class GameEnv:
 
             if (piece.name[0] == 'w' and self.movenum %2 == 0) or (piece.name[0] == 'b' and self.movenum % 2 == 1):
 
-                self.circles = piece.straight(self.pieces, 1, 1) + piece.diag(self.pieces, 1, 1)
+                self.circles = piece.king(self.pieces)
+        
+        if piece.name[1] == 'n':
+            
+            # four for loops for each straight direction
+
+            if (piece.name[0] == 'w' and self.movenum %2 == 0) or (piece.name[0] == 'b' and self.movenum % 2 == 1):
+
+                self.circles = piece.l(self.pieces)
 
 
 # after initpiece() initializes with self.fen, the pieces automate themselves and are refreshed remembering on where they
@@ -264,8 +272,6 @@ if __name__ == "__main__":
                         env.movenum += 1
 
                         env.pieces[(x,y)].moved = True
-
-                        print(env.pieces)
                     
                     else: # IMPORTANT: ALLOWS PLAYER TO PICK A NEW PIECE
                         env.circles = []
@@ -274,6 +280,7 @@ if __name__ == "__main__":
                 if len(env.circles) == 0:
 
                     if (x,y) in env.pieces:
+
                         initpos = (x,y)
                         env.move((x,y))
 

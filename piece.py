@@ -139,11 +139,75 @@ class Piece:
 
         return circles
 
-    def pawn(self,pieces):
-        pass
+    def l(self,pieces):
+        circles = []
+        pmoves = [(-2, 1), (-1, 2), (2, -1), (1, -2),
+            (1, 2), (-1, -2), (-2, -1), (2, 1)]
 
-    def L(self,pieces):
-        pass
+        for pos in pmoves:
+            ncoords = (self.coords[0] + pos[0], self.coords[1] + pos[1])
 
+            if (ncoords[0] >= 0 and ncoords[0] <= 7) and (ncoords[1] >= 0 and ncoords[1] <= 7):
+
+                if ncoords not in pieces:
+                    circles.append(ncoords)
+                    
+                if ncoords in pieces and pieces[ncoords].name[0] != self.name[0]:
+                    circles.append(ncoords)
+                    continue
+                
+                if ncoords in pieces and pieces[ncoords].name[0] == self.name[0]:
+                    continue
+
+        return circles
+    
+    # King Movement: HAVE NOT YET IMPLEMENTED CASTLING AND CONCEPT THAT KING CANT MOVE INTO CHECK
     def king(self,pieces):
-        pass
+
+        circles = []
+
+        pmoves = [(-1,0), (-1,-1), (-1,1),
+            (0,1), (0,-1), (1,1), (1,0), (1,-1)] # possible moves
+
+        for pos in pmoves:
+            ncoords = (self.coords[0] + pos[0], self.coords[1] + pos[1])
+
+            if (ncoords[0] >= 0 and ncoords[0] <= 7) and (ncoords[1] >= 0 and ncoords[1] <= 7):
+
+                if ncoords not in pieces:
+                    circles.append(ncoords)
+                    
+                if ncoords in pieces and pieces[ncoords].name[0] != self.name[0]:
+                    circles.append(ncoords)
+                    continue
+                
+                if ncoords in pieces and pieces[ncoords].name[0] == self.name[0]:
+                    continue
+        
+        # CASTLING
+        if not self.moved:
+
+            ncoords = (self.coords[0] + 1, self.coords[1])
+
+            # checking kingside castling
+            while ncoords not in pieces and ncoords[0] <= 7:
+
+                ncoords = (ncoords[0] + 1, ncoords[1])
+
+
+            if (pieces[ncoords].name == self.name[0] + 'r') and not pieces[ncoords].moved:
+                circles.append((self.coords[0] + 2, self.coords[1]))
+
+            ncoords = (self.coords[0] - 1, self.coords[1])
+
+            # checking queenside castling
+            while ncoords not in pieces and ncoords >= 0:
+
+                ncoords = (ncoords[0] - 1, ncoords[1])
+
+            if (pieces[ncoords].name == self.name[0] + 'r') and not pieces[ncoords].moved:
+                circles.append((self.coords[0] - 2, self.coords[1]))
+
+        
+        return circles
+        
