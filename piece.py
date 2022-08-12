@@ -9,6 +9,10 @@ class Piece:
 
         self.coords = coords
 
+        self.attackMoves = [] # attacking moves for the piece
+
+        self.pieceobstr = [] # pieces that obstruct the pieces movement
+
 
     def straight(self, pieces, ROWS = 8, COLS = 8):
 
@@ -19,24 +23,32 @@ class Piece:
 
             if (i + 1, self.coords[1]) not in pieces:
                 circles.append((i + 1, self.coords[1]))
+                self.attackMoves.append((i + 1, self.coords[1]))
 
             elif (i + 1, self.coords[1]) in pieces and pieces[(i + 1, self.coords[1])].name[0] != self.name[0]:
-                circles.append((+ i + 1, self.coords[1]))
+                circles.append((i + 1, self.coords[1]))
+                self.attackMoves.append((i + 1, self.coords[1]))
+                self.pieceobstr.append((i + 1, self.coords[1]))
                 break
 
             elif (i + 1, self.coords[1]) in pieces and pieces[(i + 1, self.coords[1])].name[0] == self.name[0]:
+                self.pieceobstr.append((i + 1, self.coords[1]))
                 break
 
         for i in range(COLS - self.coords[0], COLS, 1):
 
             if (COLS - i - 1, self.coords[1]) not in pieces:
                 circles.append((COLS - i - 1, self.coords[1]))
+                self.attackMoves.append((COLS - i - 1, self.coords[1]))
 
             elif (COLS - i - 1, self.coords[1]) in pieces and pieces[(COLS - i - 1, self.coords[1])].name[0] != self.name[0]:
                 circles.append((COLS - i - 1, self.coords[1]))
+                self.attackMoves.append((COLS - i - 1, self.coords[1]))
+                self.pieceobstr.append((COLS - i - 1, self.coords[1]))
                 break
 
             elif (COLS - i - 1, self.coords[1]) in pieces and pieces[(COLS - i - 1, self.coords[1])].name[0] == self.name[0]:
+                self.pieceobstr.append((COLS - i - 1, self.coords[1]))
                 break
 
 
@@ -45,25 +57,32 @@ class Piece:
 
             if (self.coords[0], i + 1) not in pieces:
                 circles.append((self.coords[0], i + 1))
+                self.attackMoves.append((self.coords[0], i + 1))
 
             elif (self.coords[0], i + 1) in pieces and pieces[(self.coords[0], i + 1)].name[0] != self.name[0]:
                 circles.append((self.coords[0], i + 1))
+                self.attackMoves.append((self.coords[0], i + 1))
+                self.pieceobstr.append((self.coords[0], i + 1))
                 break
 
             elif (self.coords[0], i + 1) in pieces and pieces[(self.coords[0], i + 1)].name[0] == self.name[0]:
+                self.pieceobstr.append((self.coords[0], i + 1))
                 break
 
         for i in range(ROWS - self.coords[1],ROWS, 1):
 
-
             if (self.coords[0], ROWS - i - 1) not in pieces:
                 circles.append((self.coords[0], ROWS - i - 1))
+                self.attackMoves.append((self.coords[0], ROWS - i - 1))
 
             elif (self.coords[0], ROWS - i - 1) in pieces and pieces[(self.coords[0], ROWS - i - 1)].name[0] != self.name[0]:
                 circles.append((self.coords[0], ROWS - i - 1))
+                self.attackMoves.append((self.coords[0], ROWS - i - 1))
+                self.pieceobstr.append((self.coords[0], ROWS - i - 1))
                 break
 
             elif (self.coords[0], ROWS - i - 1) in pieces and pieces[(self.coords[0], ROWS - i - 1)].name[0] == self.name[0]:
+                self.pieceobstr.append((self.coords[0], ROWS - i - 1))
                 break
 
         return circles
@@ -81,10 +100,16 @@ class Piece:
 
             if ncoords not in pieces:
                 circles.append(ncoords)
+                self.attackMoves.append(ncoords)
+                
             if ncoords in pieces and pieces[ncoords].name[0] != self.name[0]:
                 circles.append(ncoords)
+                self.attackMoves.append(ncoords)
+                self.pieceobstr.append(ncoords)
                 break
+
             if ncoords in pieces and pieces[ncoords].name[0] == self.name[0]:
+                self.pieceobstr.append(ncoords)
                 break
                 
             i += 1
@@ -97,10 +122,16 @@ class Piece:
             
             if ncoords not in pieces:
                 circles.append(ncoords)
+                self.attackMoves.append(ncoords)
+
             if ncoords in pieces and pieces[ncoords].name[0] != self.name[0]:
                 circles.append(ncoords)
+                self.attackMoves.append(ncoords)
+                self.pieceobstr.append(ncoords)
                 break
+
             if ncoords in pieces and pieces[ncoords].name[0] == self.name[0]:
+                self.pieceobstr.append(ncoords)
                 break
                 
             j += 1
@@ -113,10 +144,16 @@ class Piece:
             
             if ncoords not in pieces:
                 circles.append(ncoords)
+                self.attackMoves.append(ncoords)
+
             if ncoords in pieces and pieces[ncoords].name[0] != self.name[0]:
                 circles.append(ncoords)
+                self.attackMoves.append(ncoords)
+                self.pieceobstr.append(ncoords)
                 break
+
             if ncoords in pieces and pieces[ncoords].name[0] == self.name[0]:
+                self.pieceobstr.append(ncoords)
                 break
                 
             l += 1    
@@ -129,10 +166,16 @@ class Piece:
             
             if ncoords not in pieces:
                 circles.append(ncoords)
+                self.attackMoves.append(ncoords)
+
             if ncoords in pieces and pieces[ncoords].name[0] != self.name[0]:
                 circles.append(ncoords)
+                self.attackMoves.append(ncoords)
+                self.pieceobstr.append(ncoords)
                 break
+
             if ncoords in pieces and pieces[ncoords].name[0] == self.name[0]:
+                self.pieceobstr.append(ncoords)
                 break
                 
             k += 1
@@ -151,13 +194,17 @@ class Piece:
 
                 if ncoords not in pieces:
                     circles.append(ncoords)
-                    
+                    self.attackMoves.append(ncoords)
+
                 if ncoords in pieces and pieces[ncoords].name[0] != self.name[0]:
                     circles.append(ncoords)
-                    continue
-                
+                    self.attackMoves.append(ncoords)
+                    self.pieceobstr.append(ncoords)
+                    break
+
                 if ncoords in pieces and pieces[ncoords].name[0] == self.name[0]:
-                    continue
+                    self.pieceobstr.append(ncoords)
+                    break
 
         return circles
     
@@ -176,15 +223,19 @@ class Piece:
 
                 if ncoords not in pieces:
                     circles.append(ncoords)
-                    
+                    self.attackMoves.append(ncoords)
+
                 if ncoords in pieces and pieces[ncoords].name[0] != self.name[0]:
                     circles.append(ncoords)
-                    continue
-                
+                    self.attackMoves.append(ncoords)
+                    self.pieceobstr.append(ncoords)
+                    break
+
                 if ncoords in pieces and pieces[ncoords].name[0] == self.name[0]:
-                    continue
+                    self.pieceobstr.append(ncoords)
+                    break
         
-        # CASTLING
+        # ALLOWING CASTLING BY APPENDING TO CIRCLES (move.py handles movements of pieces)
         if not self.moved:
 
             ncoords = (self.coords[0] + 1, self.coords[1])
@@ -201,7 +252,7 @@ class Piece:
             ncoords = (self.coords[0] - 1, self.coords[1])
 
             # checking queenside castling
-            while ncoords not in pieces and ncoords >= 0:
+            while ncoords not in pieces and ncoords[0] >= 0:
 
                 ncoords = (ncoords[0] - 1, ncoords[1])
 

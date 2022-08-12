@@ -7,6 +7,7 @@ setup.py is to set up the game using pygame as I'll use tensorflow for ML
 
 from piece import Piece
 import pygame
+import move as move
 
 class GameEnv:
 
@@ -18,11 +19,16 @@ class GameEnv:
 
         self.pieces = {}
 
+        self.attackingSquaresW = [] # squares that White is attacking (wr can take piece on d5 ex)
+        self.attackingSquaresB = [] # squares that Black is attacking (br can take piece on d5 ex)
+
         self.movenum = 0
 
         self.initboard()
 
         self.circles = []
+
+        self.moves = []
 
     # initializing board
     def initboard(self):
@@ -148,6 +154,9 @@ class GameEnv:
                 if (coords[0] + 1, coords[1] + 1) in self.pieces and self.pieces[(coords[0] + 1, coords[1] + 1)].name[0] == 'w':
                     self.circles.append((coords[0] + 1, coords[1] + 1))
 
+                # En passant
+
+
             #MOVEMENT FOR WHITE PIECES
             if self.movenum % 2 == 0 and piece.name[0] == 'w':
                 if not piece.moved:
@@ -230,6 +239,8 @@ class GameEnv:
 
 if __name__ == "__main__":
 
+    letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+
     env = GameEnv()
 
     run = True
@@ -239,7 +250,11 @@ if __name__ == "__main__":
 
     initpos = None
 
+    check = False
+
     while run:
+
+        s = ''
 
         clock.tick(60)
         env.drawcubes()
@@ -262,16 +277,38 @@ if __name__ == "__main__":
 
                     # taking piece
                     if (x,y) in env.circles:
+                        
+                        if env.pieces[initpos].name[1] != 'p':
+                            s += env.pieces[initpos].name[1].upper()
 
-                        env.pieces[initpos].coords = (x,y)
-                        env.pieces[(x,y)] = env.pieces[initpos]
+                        if (x,y) in env.pieces:
+                            
+                            if env.pieces[initpos].name[1] == 'p':
+                                s += letters[initpos[0]]
+                            s += 'x'
 
-                        del env.pieces[initpos]
+                        env, check = move.move(initpos, (x,y), env, check)
+
+                        s += letters[x] + str(8-y)
+
+                        # castling fancy string stuff
+                        if env.pieces[(x,y)].name[1] == 'k':
+                            if initpos[0] - x == 2:
+                                s = 'O-O-O'
+                            if initpos[0] - x == -2:
+                                s = 'O-O'
+
 
                         env.circles = []
                         env.movenum += 1
 
                         env.pieces[(x,y)].moved = True
+
+                        if check:
+                            s += '+'
+                        
+                        env.moves.append(s)
+                        s = ''
                     
                     else: # IMPORTANT: ALLOWS PLAYER TO PICK A NEW PIECE
                         env.circles = []
@@ -288,6 +325,21 @@ if __name__ == "__main__":
         pygame.display.update()
             
     pygame.quit()
+
+    print('PGN of game:')
+
+    for i, val in enumerate(env.moves):
+
+        if i % 2 == 0:
+            print(str((i//2) + 1)+'. ',end = '')
+
+        print(val+' ', end = '')
+
+        if i % 2 == 1:
+            print()
+
+
+        
 
 
 
