@@ -1,4 +1,16 @@
+'''
+Piece.py is an object for every piece on the board. Knowing which spots a piece can move is handled by
+the functions below. There's a different function for each type of piece, except for the Queen, which is handled
+by concatenating the two lists made by straight() and diag()
 
+All functions follow the same checks, as in:
+First check is if the coordinate already has a piece there
+-If not, add the piece to circles and attackMoves
+
+-If it does, is the piece opposite colored? If so, add the piece to circles and attackMoves but stop parsing
+
+-If it does already have a piece there and the piece is same colored, add nothing and stop parsing
+'''
 
 class Piece:
 

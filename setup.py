@@ -246,7 +246,7 @@ if __name__ == "__main__":
     run = True
     clock = pygame.time.Clock()
 
-    env.initpiece()
+    env.initpiece() # initializing board and pieces in environment
 
     initpos = None
 
@@ -254,7 +254,7 @@ if __name__ == "__main__":
 
     while run:
 
-        s = ''
+        s = ''  # anything with s is only helping with PGN, not important to functionality of code
 
         clock.tick(60)
         env.drawcubes()
@@ -273,6 +273,7 @@ if __name__ == "__main__":
                 x = int(pos[0]/100)
                 y = int(pos[1]/100)
 
+                # if a piece has already been selected
                 if len(env.circles) != 0:
 
                     # taking piece
