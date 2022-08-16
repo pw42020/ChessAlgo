@@ -212,11 +212,13 @@ class Piece:
                     circles.append(ncoords)
                     self.attackMoves.append(ncoords)
                     self.pieceobstr.append(ncoords)
-                    break
+                    
+                    continue
 
                 if ncoords in pieces and pieces[ncoords].name[0] == self.name[0]:
                     self.pieceobstr.append(ncoords)
-                    break
+
+                    continue
 
         return circles
     
@@ -241,11 +243,11 @@ class Piece:
                     circles.append(ncoords)
                     self.attackMoves.append(ncoords)
                     self.pieceobstr.append(ncoords)
-                    break
+                    continue
 
                 if ncoords in pieces and pieces[ncoords].name[0] == self.name[0]:
                     self.pieceobstr.append(ncoords)
-                    break
+                    continue
         
         # ALLOWING CASTLING BY APPENDING TO CIRCLES (move.py handles movements of pieces)
         if not self.moved:

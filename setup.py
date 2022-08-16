@@ -233,6 +233,36 @@ class GameEnv:
 
                 self.circles = piece.l(self.pieces)
 
+    def showAttackMoves(self):
+
+        cubew = self.WIDTH/8
+        cubeh = self.HEIGHT/8
+
+        uniquelist = []
+
+        for coords in self.attackingSquaresW:
+
+            if coords not in uniquelist:
+
+                img = pygame.image.load("C:\\Users\\Ninja\\OneDrive\\Documents\\GitHub\\ChessAlgo\\Pieces\\attackmovew.png")
+
+                self.win.blit(img, (coords[0]*cubew, coords[1]*cubeh))
+            
+                uniquelist.append(coords)
+        
+        uniquelist = []
+
+        for coords in self.attackingSquaresB:
+
+            if coords not in uniquelist:
+
+                img = pygame.image.load("C:\\Users\\Ninja\\OneDrive\\Documents\\GitHub\\ChessAlgo\\Pieces\\attackmoveb.png")
+
+                self.win.blit(img, (coords[0]*cubew, coords[1]*cubeh))
+
+                uniquelist.append(coords)
+            
+
 
 # after initpiece() initializes with self.fen, the pieces automate themselves and are refreshed remembering on where they
 # used to be using their coordinates
@@ -247,6 +277,7 @@ if __name__ == "__main__":
     clock = pygame.time.Clock()
 
     env.initpiece() # initializing board and pieces in environment
+    env = move.initAttackMoves(env)
 
     initpos = None
 
@@ -261,6 +292,8 @@ if __name__ == "__main__":
 
         env.updatepieces()
 
+        env.showAttackMoves()
+
         for event in pygame.event.get():
 
             if event.type == pygame.QUIT:
@@ -272,6 +305,8 @@ if __name__ == "__main__":
 
                 x = int(pos[0]/100)
                 y = int(pos[1]/100)
+
+                print(x,y)
 
                 # if a piece has already been selected
                 if len(env.circles) != 0:
@@ -322,7 +357,6 @@ if __name__ == "__main__":
                         initpos = (x,y)
                         env.move((x,y))
 
-        
         pygame.display.update()
             
     pygame.quit()
