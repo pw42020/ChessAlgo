@@ -30,6 +30,8 @@ class GameEnv:
 
         self.moves = []
 
+        self.wk, bk = (0,0), (0,0)
+
     # initializing board
     def initboard(self):
         pygame.init()
@@ -94,6 +96,11 @@ class GameEnv:
                 piece = Piece(char, (val%8, val//8))
 
                 self.pieces[(val%8, val//8)] = piece
+
+                if char == 'bk':
+                    self.bk = (val%8, val//8)
+                elif char == 'wk':
+                    self.wk = (val%8, val//8)
                 
                 img = pygame.image.load("C:\\Users\\Ninja\\OneDrive\\Documents\\GitHub\\ChessAlgo\\Pieces\\"+char+".png")
                 img = pygame.transform.scale(img, (cubew,cubeh))
@@ -129,56 +136,11 @@ class GameEnv:
         # PAWN MOVEMENT
         if piece.name[1] == 'p':
 
-            #MOVEMENT FOR BLACK PIECES
-            if self.movenum % 2 == 1 and piece.name[0] == 'b': 
-
-                # can move two pieces up if pawn hasn't moved
-                if not piece.moved:
-                    for i in range(2):
-                        checkKey = (coords[0], coords[1] + i + 1)
-
-                        if checkKey not in self.pieces:
-                            self.circles.append(checkKey)
-
-                if piece.moved:
-
-                    checkKey = (coords[0], coords[1] + 1)
-
-                    if checkKey not in self.pieces:
-                            self.circles.append(checkKey)
-
-                # diagonal motion
-                if (coords[0] - 1, coords[1] + 1) in self.pieces and self.pieces[(coords[0] - 1, coords[1] + 1)].name[0] == 'w':
-                    self.circles.append((coords[0] - 1, coords[1] + 1))
-
-                if (coords[0] + 1, coords[1] + 1) in self.pieces and self.pieces[(coords[0] + 1, coords[1] + 1)].name[0] == 'w':
-                    self.circles.append((coords[0] + 1, coords[1] + 1))
-
-                # En passant
-
-
+            if self.movenum % 2 == 1 and piece.name[0] == 'b':
+                self.circles = piece.circles
             #MOVEMENT FOR WHITE PIECES
             if self.movenum % 2 == 0 and piece.name[0] == 'w':
-                if not piece.moved:
-                    for i in range(2):
-                        checkKey = (coords[0], coords[1] - i - 1)
-
-                        if checkKey not in self.pieces:
-                            self.circles.append(checkKey)
-
-                if piece.moved:
-
-                    checkKey = (coords[0], coords[1] - 1)
-
-                    if checkKey not in self.pieces:
-                            self.circles.append(checkKey)
-
-                # diagonal motion
-                if (coords[0] - 1, coords[1] - 1) in self.pieces and self.pieces[(coords[0] - 1, coords[1] - 1)].name[0] == 'b':
-                    self.circles.append((coords[0] - 1, coords[1] - 1))
-
-                if (coords[0] + 1, coords[1] - 1) in self.pieces and self.pieces[(coords[0] + 1, coords[1] - 1)].name[0] == 'b':
-                    self.circles.append((coords[0] + 1, coords[1] - 1))
+                self.circles = piece.circles
                 
                 
         # MOVEMENTS FOR ALL PIECES OTHER THAN PAWN
@@ -199,7 +161,7 @@ class GameEnv:
 
             if (piece.name[0] == 'w' and self.movenum %2 == 0) or (piece.name[0] == 'b' and self.movenum % 2 == 1):
 
-                self.circles = piece.straight(self.pieces)
+                self.circles = piece.circles
 
         if piece.name[1] == 'b':
             
@@ -207,7 +169,7 @@ class GameEnv:
 
             if (piece.name[0] == 'w' and self.movenum %2 == 0) or (piece.name[0] == 'b' and self.movenum % 2 == 1):
 
-                self.circles = piece.diag(self.pieces)
+                self.circles = piece.circles
 
         if piece.name[1] == 'q':
             
@@ -215,7 +177,7 @@ class GameEnv:
 
             if (piece.name[0] == 'w' and self.movenum %2 == 0) or (piece.name[0] == 'b' and self.movenum % 2 == 1):
 
-                self.circles = piece.straight(self.pieces) + piece.diag(self.pieces)
+                self.circles = piece.circles
 
         if piece.name[1] == 'k':
             
@@ -223,7 +185,7 @@ class GameEnv:
 
             if (piece.name[0] == 'w' and self.movenum %2 == 0) or (piece.name[0] == 'b' and self.movenum % 2 == 1):
 
-                self.circles = piece.king(self.pieces)
+                self.circles = piece.circles
         
         if piece.name[1] == 'n':
             
@@ -231,7 +193,7 @@ class GameEnv:
 
             if (piece.name[0] == 'w' and self.movenum %2 == 0) or (piece.name[0] == 'b' and self.movenum % 2 == 1):
 
-                self.circles = piece.l(self.pieces)
+                self.circles = piece.circles
 
     def showAttackMoves(self):
 
@@ -292,7 +254,7 @@ if __name__ == "__main__":
 
         env.updatepieces()
 
-        env.showAttackMoves()
+        #env.showAttackMoves()
 
         for event in pygame.event.get():
 
@@ -305,8 +267,6 @@ if __name__ == "__main__":
 
                 x = int(pos[0]/100)
                 y = int(pos[1]/100)
-
-                print(x,y)
 
                 # if a piece has already been selected
                 if len(env.circles) != 0:
@@ -334,6 +294,12 @@ if __name__ == "__main__":
                             if initpos[0] - x == -2:
                                 s = 'O-O'
 
+                        # tracking king movement for check checks
+                        if env.pieces[(x,y)].name == 'bk':
+                            env.bk = (x,y)
+                        elif env.pieces[(x,y)].name == 'wk':
+                            env.wk = (x,y)
+
 
                         env.circles = []
                         env.movenum += 1
@@ -345,6 +311,9 @@ if __name__ == "__main__":
                         
                         env.moves.append(s)
                         s = ''
+
+                        # check if check has occurred
+
                     
                     else: # IMPORTANT: ALLOWS PLAYER TO PICK A NEW PIECE
                         env.circles = []
