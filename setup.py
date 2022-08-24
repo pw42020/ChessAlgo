@@ -131,70 +131,14 @@ class GameEnv:
     def move(self,coords):
 
         piece = self.pieces[coords]
-                    
         
-        # PAWN MOVEMENT
-        if piece.name[1] == 'p':
+        if self.movenum % 2 == 0 and piece.name[0] == 'w':
+            self.circles = piece.circles
 
-            if self.movenum % 2 == 1 and piece.name[0] == 'b':
-                self.circles = piece.circles
-            #MOVEMENT FOR WHITE PIECES
-            if self.movenum % 2 == 0 and piece.name[0] == 'w':
-                self.circles = piece.circles
-                
-                
-        # MOVEMENTS FOR ALL PIECES OTHER THAN PAWN
-
-        '''
-        ----3 Conditions for movement----
-        1. If coordinate in front not in pieces dictionary
-        2. If piece is in pieces dictionary but is enemy piece
-        3. If piece is in pieces dictionary but is not enemy piece
-        '''
-                    
-
-
-        # MOVEMENT FOR ROOK ** HAVE NOT IMPLEMENTED CASTLING YET **
-        if piece.name[1] == 'r':
-            
-            # four for loops for each straight direction
-
-            if (piece.name[0] == 'w' and self.movenum %2 == 0) or (piece.name[0] == 'b' and self.movenum % 2 == 1):
-
-                self.circles = piece.circles
-
-        if piece.name[1] == 'b':
-            
-            # four for loops for each straight direction
-
-            if (piece.name[0] == 'w' and self.movenum %2 == 0) or (piece.name[0] == 'b' and self.movenum % 2 == 1):
-
-                self.circles = piece.circles
-
-        if piece.name[1] == 'q':
-            
-            # four for loops for each straight direction
-
-            if (piece.name[0] == 'w' and self.movenum %2 == 0) or (piece.name[0] == 'b' and self.movenum % 2 == 1):
-
-                self.circles = piece.circles
-
-        if piece.name[1] == 'k':
-            
-            # four for loops for each straight direction
-
-            if (piece.name[0] == 'w' and self.movenum %2 == 0) or (piece.name[0] == 'b' and self.movenum % 2 == 1):
-
-                self.circles = piece.circles
-        
-        if piece.name[1] == 'n':
-            
-            # four for loops for each straight direction
-
-            if (piece.name[0] == 'w' and self.movenum %2 == 0) or (piece.name[0] == 'b' and self.movenum % 2 == 1):
-
-                self.circles = piece.circles
-
+        elif self.movenum % 2 == 1 and piece.name[0] == 'b':
+            self.circles = piece.circles
+    
+    # function that shows all squares white can capture in red, and all squares black can capture in green
     def showAttackMoves(self):
 
         cubew = self.WIDTH/8
@@ -283,7 +227,7 @@ if __name__ == "__main__":
                                 s += letters[initpos[0]]
                             s += 'x'
 
-                        env, check = move.move(initpos, (x,y), env, check)
+                        env, check, mate = move.move(initpos, (x,y), env, check)
 
                         s += letters[x] + str(8-y)
 
@@ -293,13 +237,6 @@ if __name__ == "__main__":
                                 s = 'O-O-O'
                             if initpos[0] - x == -2:
                                 s = 'O-O'
-
-                        # tracking king movement for check checks
-                        if env.pieces[(x,y)].name == 'bk':
-                            env.bk = (x,y)
-                        elif env.pieces[(x,y)].name == 'wk':
-                            env.wk = (x,y)
-
 
                         env.circles = []
                         env.movenum += 1

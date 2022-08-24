@@ -22,29 +22,48 @@ def move(initpos, newpos, env, check):
     # Queenside castling
     if pieces[initpos].name[1] == 'k' and (newpos[0] == initpos[0] - 2):
 
+        # king movement
         pieces[(newpos[0] - 2, newpos[1])].coords = (newpos[0] + 1, newpos[1])
 
         pieces[(newpos[0] + 1, newpos[1])] = pieces[(newpos[0] - 2, newpos[1])]
 
         del pieces[(newpos[0] - 2, newpos[1])]
 
+        pieces[initpos].nocastle = False # castling has occurred so no more castling
+
     # Kingside castling
     if pieces[initpos].name[1] == 'k' and (newpos[0] == initpos[0] + 2):
 
+        # rook movement
         pieces[(newpos[0] + 1, newpos[1])].coords = (newpos[0] - 1, newpos[1])
 
         pieces[(newpos[0] - 1, newpos[1])] = pieces[(newpos[0] + 1, newpos[1])]
 
         del pieces[(newpos[0] + 1, newpos[1])]
 
+        pieces[initpos].nocastle = False # castling has occurred so no more castling
+
     pieces[initpos].coords = newpos
     pieces[newpos] = pieces[initpos]
     del pieces[initpos]
 
+    # changing coordinates for white and black king in env
+    if pieces[newpos].name == 'wk':
+        env.wk = newpos
+    if pieces[newpos].name == 'bk':
+        env.bk = newpos
+
+    # auto queen
+    if pieces[newpos].name == 'wp' and newpos[1] == 0:
+        pieces[newpos].name = 'wq'
+
+    if pieces[newpos].name == 'bp' and newpos[1] == 7:
+        pieces[newpos].name = 'bq'
+
     env.attackingSquaresW = []
     env.attackingSquaresB = []
 
-    env = updateAttackMoves(env, check)
+    env, mate = updateAttackMoves(env, check)
 
     # to check if in check:
     
@@ -58,7 +77,8 @@ def move(initpos, newpos, env, check):
     saveking = []
 
     # string of if statements that return all possible coordinates required from other pieces to stop mate
-    if (env.bk in env.attackingSquaresW):
+    # making sure it's only found once as if it's found twice it's double check and king has to move
+    if env.attackingSquaresW.count(env.bk) == 1:
         for key in env.pieces:
             piece = env.pieces[key]
 
@@ -66,67 +86,14 @@ def move(initpos, newpos, env, check):
 
                 for coords in piece.attackMoves:
                     if coords == env.bk:
-                        # if a rook put the king in check
-                        if piece.name[1] == 'r':
-                            if env.bk[0] == piece.coords[0]:
-                                if env.bk[1] > piece.coords[1]:
-                                    saveking = [(env.bk[0], piece.coords[1] + i) for i in range(env.bk[1] - piece.coords[1])]
-                                else:
-                                    saveking = [(env.bk[0], env.bk[1] - i - 1) for i in range(piece.coords[1] - env.bk[1])]
-                            elif env.bk[1] == piece.coords[1]:
-                                if env.bk[0] > piece.coords[0]:
-                                    saveking = [(env.bk[0] + i, piece.coords[1]) for i in range(env.bk[0] - piece.coords[0])]
-                                else:
-                                    saveking = [(env.bk[0] - i - 1, env.bk[1]) for i in range(piece.coords[0] - env.bk[0])]
-                        # if a bishop put the king in check
-                        elif piece.name[1] == 'b':
-                            m = (env.bk[1] - piece.coords[1])/(env.bk[0] - piece.coords[0]) # slope of line
+                        
+                        saveking = findsaveking(piece, env)
 
-                            if m == -1:
-                                if env.bk[0] > piece.coords[0]:
-                                    saveking = [(piece.coords[0] + i, piece.coords[1] - i) for i in range(env.bk[0] - piece.coords[0])]
-                                else:
-                                    saveking = [(piece.coords[0] - i, piece.coords[1] + i) for i in range(piece.coords[0] - env.wk[0])]
-                            elif m == 1:
-                                if env.bk[0] > piece.coords[0]:
-                                    saveking = [(piece.coords[0] + i, piece.coords[1] + i) for i in range(env.bk[0] - piece.coords[0])]
-                                else:
-                                    saveking = [(piece.coords[0] - i, piece.coords[1] - i) for i in range(piece.coords[0] - env.wk[0])]
-
-                        # if a queen put the king in check
-                        elif piece.name[1] == 'q':
-                            m = (env.bk[1] - piece.coords[1])/(env.bk[0] - piece.coords[0]) # slope of line
-
-                            if m == -1:
-                                if env.bk[0] > piece.coords[0]:
-                                    saveking = [(piece.coords[0] + i, piece.coords[1] - i) for i in range(env.bk[0] - piece.coords[0])]
-                                else:
-                                    saveking = [(piece.coords[0] - i, piece.coords[1] + i) for i in range(piece.coords[0] - env.bk[0])]
-                            elif m == 1:
-                                if env.bk[0] > piece.coords[0]:
-                                    saveking = [(piece.coords[0] + i, piece.coords[1] + i) for i in range(env.bk[0] - piece.coords[0])]
-                                else:
-                                    saveking = [(piece.coords[0] - i, piece.coords[1] - i) for i in range(piece.coords[0] - env.bk[0])]
-                            else:
-                                if env.bk[0] == piece.coords[0]:
-                                    if env.bk[1] > piece.coords[1]:
-                                        saveking = [(env.bk[0], piece.coords[1] + i) for i in range(env.bk[1] - piece.coords[1])]
-                                    else:
-                                        saveking = [(env.bk[0], env.bk[1] - i - 1) for i in range(piece.coords[1] - env.bk[1])]
-                                elif env.bk[1] == piece.coords[1]:
-                                    if env.bk[0] > piece.coords[0]:
-                                        saveking = [(env.bk[0] + i, piece.coords[1]) for i in range(env.bk[0] - piece.coords[0])]
-                                    else:
-                                        saveking = [(env.bk[0] - i - 1, env.bk[1]) for i in range(piece.coords[0] - env.bk[0])]
-
-                        # if a knight put the king in check
-                        elif piece.name[1] == 'n' or piece.name[1] == 'p':
-                            saveking = [piece.coords]
-
-        env = updateAttackMoves(env, check, saveking, 'b')
+        env, mate = updateAttackMoves(env, check, saveking, 'b')
 
     # string of if statements that return all possible coordinates required from other pieces to stop mate
-    if (env.wk in env.attackingSquaresB):
+    # making sure it's only found once as if it's found twice it's double check and king has to move
+    if env.attackingSquaresB.count(env.wk) == 1:
         for key in env.pieces:
             piece = env.pieces[key]
 
@@ -134,69 +101,15 @@ def move(initpos, newpos, env, check):
 
                 for coords in piece.attackMoves:
                     if coords == env.wk:
-                        # if a rook put the king in check
-                        if piece.name[1] == 'r':
-                            if env.wk[0] == piece.coords[0]:
-                                if env.wk[1] > piece.coords[1]:
-                                    saveking = [(env.wk[0], piece.coords[1] + i) for i in range(env.wk[1] - piece.coords[1])]
-                                else:
-                                    saveking = [(env.wk[0], env.wk[1] - i - 1) for i in range(piece.coords[1] - env.wk[1])]
-                            elif env.wk[1] == piece.coords[1]:
-                                if env.wk[0] > piece.coords[0]:
-                                    saveking = [(env.wk[0] + i, piece.coords[1]) for i in range(env.wk[0] - piece.coords[0])]
-                                else:
-                                    saveking = [(env.wk[0] - i - 1, env.wk[1]) for i in range(piece.coords[0] - env.wk[0])]
-                        # if a bishop put the king in check
-                        elif piece.name[1] == 'b':
-                            m = (env.wk[1] - piece.coords[1])/(env.wk[0] - piece.coords[0]) # slope of line
+                        
+                        saveking = findsaveking(piece, env)
 
-                            if m == -1:
-                                if env.wk[0] > piece.coords[0]:
-                                    saveking = [(piece.coords[0] + i, piece.coords[1] - i) for i in range(piece.coords[0] - env.wk[0])]
-                                else:
-                                    saveking = [(piece.coords[0] - i, piece.coords[1] + i) for i in range(env.wk[0] - piece.coords[0])]
-                            elif m == 1:
-                                if env.wk[0] > piece.coords[0]:
-                                    saveking = [(piece.coords[0] + i, piece.coords[1] + i) for i in range(piece.coords[0] - env.wk[0])]
-                                else:
-                                    saveking = [(piece.coords[0] - i, piece.coords[1] - i) for i in range(env.wk[0] - piece.coords[0])]
-
-                        # if a queen put the king in check
-                        elif piece.name[1] == 'q':
-                            m = (env.wk[1] - piece.coords[1])/(env.wk[0] - piece.coords[0]) # slope of line
-
-                            if m == -1:
-                                if env.wk[0] > piece.coords[0]:
-                                    saveking = [(piece.coords[0] + i, piece.coords[1] - i) for i in range(env.wk[0] - piece.coords[0])]
-                                else:
-                                    saveking = [(piece.coords[0] - i, piece.coords[1] + i) for i in range(piece.coords[0] - env.wk[0])]
-                            elif m == 1:
-                                if env.wk[0] > piece.coords[0]:
-                                    saveking = [(piece.coords[0] + i, piece.coords[1] + i) for i in range(env.wk[0] - piece.coords[0])]
-                                else:
-                                    saveking = [(piece.coords[0] - i, piece.coords[1] - i) for i in range(piece.coords[0] - env.wk[0])]
-                            else:
-                                if env.wk[0] == piece.coords[0]:
-                                    if env.wk[1] > piece.coords[1]:
-                                        saveking = [(env.wk[0], piece.coords[1] + i) for i in range(env.wk[1] - piece.coords[1])]
-                                    else:
-                                        saveking = [(env.wk[0], env.wk[1] - i - 1) for i in range(piece.coords[1] - env.wk[1])]
-                                elif env.wk[1] == piece.coords[1]:
-                                    if env.wk[0] > piece.coords[0]:
-                                        saveking = [(env.wk[0] + i, piece.coords[1]) for i in range(env.wk[0] - piece.coords[0])]
-                                    else:
-                                        saveking = [(env.wk[0] - i - 1, env.wk[1]) for i in range(piece.coords[0] - env.wk[0])]
-
-                        # if a knight put the king in check
-                        elif piece.name[1] == 'n' or piece.name[1] == 'p':
-                            saveking = [piece.coords]
-
-        env = updateAttackMoves(env, check, saveking, 'w')
+        env, mate = updateAttackMoves(env, check, saveking, 'w')
 
             
 
 
-    return env, check
+    return env, check, mate
 
 # if piece that moved was obstructing a move for piece, it updates on this list using the piece movement functions
 # PLEASE NOTE: The functions for Piece objects return circles, and since they aren't void functions, I used deez
@@ -204,8 +117,18 @@ def move(initpos, newpos, env, check):
 def updateAttackMoves(env, check, saveking = [], color = ''):
 
     pmoves = []
+    mate = False
 
     for key in env.pieces:
+
+        env.pieces[key].pin = [0, 0, 0, 0] # resetting pin, allowing piece.findpinnedpieces() to see if the piece is still pinned
+
+    # finding king moves first so all pieces will know if they're pinned
+    filler = updateAttackMovesHelpFunc(env.pieces[env.wk], env, saveking)
+    filler = updateAttackMovesHelpFunc(env.pieces[env.bk], env, saveking)
+
+    for key in env.pieces:
+
         filler = updateAttackMovesHelpFunc(env.pieces[key], env, saveking)
 
         if check and env.pieces[key].name[0] == color: # only taking possible moves into account from pieces of color that's in check
@@ -214,8 +137,9 @@ def updateAttackMoves(env, check, saveking = [], color = ''):
 
     if check and len(pmoves) == 0:
         print("Game Over")
+        mate = True
 
-    return env
+    return env, mate
 
 def updateAttackMovesHelpFunc(piece, env, saveking):
 
@@ -231,7 +155,6 @@ def updateAttackMovesHelpFunc(piece, env, saveking):
     if piece.name[1] == 'p':
         if piece.name[0] == 'w':
             piece.whitepawn(env.pieces, saveking)
-            print(saveking)
         elif piece.name[0] == 'b':
             piece.blackpawn(env.pieces, saveking)
 
@@ -274,6 +197,9 @@ def initAttackMoves(env):
         deez = [] # even though deez isn't used this is to keep it from overflowing after 100+ moves
         piece = env.pieces[key]
 
+        if piece.name[1] == 'k':
+            piece.king(env.pieces)
+
         if piece.name[1] == 'p':
             if piece.name[0] == 'w':
                 piece.whitepawn(env.pieces)
@@ -295,9 +221,6 @@ def initAttackMoves(env):
             piece.straight(env.pieces)
             piece.diag(env.pieces)
 
-        if piece.name[1] == 'k':
-            piece.king(env.pieces)
-
         for coords in piece.attackMoves:
             if piece.name[0] == 'w':
                 env.attackingSquaresW.append(coords)
@@ -307,3 +230,64 @@ def initAttackMoves(env):
     
     return env
 
+# function that returns all possible coordinates that a piece could move to that would save the king from checkmate
+def findsaveking(piece, env):
+    # if a rook put the king in check
+    if piece.name[1] == 'r':
+        if env.bk[0] == piece.coords[0]:
+            if env.bk[1] > piece.coords[1]:
+                saveking = [(env.bk[0], piece.coords[1] + i) for i in range(env.bk[1] - piece.coords[1])]
+            else:
+                saveking = [(env.bk[0], env.bk[1] - i - 1) for i in range(piece.coords[1] - env.bk[1])]
+        elif env.bk[1] == piece.coords[1]:
+            if env.bk[0] > piece.coords[0]:
+                saveking = [(env.bk[0] + i, piece.coords[1]) for i in range(env.bk[0] - piece.coords[0])]
+            else:
+                saveking = [(env.bk[0] - i - 1, env.bk[1]) for i in range(piece.coords[0] - env.bk[0])]
+
+    # if a bishop put the king in check
+    elif piece.name[1] == 'b':
+        m = (env.bk[1] - piece.coords[1])/(env.bk[0] - piece.coords[0]) # slope of line
+
+        if m == -1:
+            if env.bk[0] > piece.coords[0]:
+                saveking = [(piece.coords[0] + i, piece.coords[1] - i) for i in range(env.bk[0] - piece.coords[0])]
+            else:
+                saveking = [(piece.coords[0] - i, piece.coords[1] + i) for i in range(piece.coords[0] - env.wk[0])]
+        elif m == 1:
+            if env.bk[0] > piece.coords[0]:
+                saveking = [(piece.coords[0] + i, piece.coords[1] + i) for i in range(env.bk[0] - piece.coords[0])]
+            else:
+                saveking = [(piece.coords[0] - i, piece.coords[1] - i) for i in range(piece.coords[0] - env.wk[0])]
+
+    # if a queen put the king in check
+    elif piece.name[1] == 'q':
+        m = (env.bk[1] - piece.coords[1])/(env.bk[0] - piece.coords[0]) # slope of line
+
+        if m == -1:
+            if env.bk[0] > piece.coords[0]:
+                saveking = [(piece.coords[0] + i, piece.coords[1] - i) for i in range(env.bk[0] - piece.coords[0])]
+            else:
+                saveking = [(piece.coords[0] - i, piece.coords[1] + i) for i in range(piece.coords[0] - env.bk[0])]
+        elif m == 1:
+            if env.bk[0] > piece.coords[0]:
+                saveking = [(piece.coords[0] + i, piece.coords[1] + i) for i in range(env.bk[0] - piece.coords[0])]
+            else:
+                saveking = [(piece.coords[0] - i, piece.coords[1] - i) for i in range(piece.coords[0] - env.bk[0])]
+        else:
+            if env.bk[0] == piece.coords[0]:
+                if env.bk[1] > piece.coords[1]:
+                    saveking = [(env.bk[0], piece.coords[1] + i) for i in range(env.bk[1] - piece.coords[1])]
+                else:
+                    saveking = [(env.bk[0], env.bk[1] - i - 1) for i in range(piece.coords[1] - env.bk[1])]
+            elif env.bk[1] == piece.coords[1]:
+                if env.bk[0] > piece.coords[0]:
+                    saveking = [(env.bk[0] + i, piece.coords[1]) for i in range(env.bk[0] - piece.coords[0])]
+                else:
+                    saveking = [(env.bk[0] - i - 1, env.bk[1]) for i in range(piece.coords[0] - env.bk[0])]
+
+    # if a knight or pawn put the king in check
+    elif piece.name[1] == 'n' or piece.name[1] == 'p':
+        saveking = [piece.coords]
+
+    return saveking
