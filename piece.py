@@ -20,8 +20,12 @@ in check or pinning itself between the king and the piece)
 
 class Piece:
 
-    def __init__(self, piece, coords):
-        self.name = piece
+    def __init__(self, name, coords):
+
+        pts = {'q': 9, 'p': 1, 'b': 3, 'n': 3, 'r': 5, 'k': 100}
+        self.pt = pts[name[1]]
+
+        self.name = name
 
         self.moved = False
 

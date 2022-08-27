@@ -8,10 +8,11 @@ setup.py is to set up the game using pygame as I'll use tensorflow for ML
 from piece import Piece
 import pygame
 import move as move
+from eval import Eval
 
 class GameEnv:
 
-    def __init__(self, fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'):
+    def __init__(self, fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w'):
 
         self.WIDTH, self.HEIGHT = 800, 800
 
@@ -31,6 +32,8 @@ class GameEnv:
         self.moves = []
 
         self.wk, bk = (0,0), (0,0)
+
+        self.total = 0 # total pieces for one side, positive means white has more material, vice versa for black
 
     # initializing board
     def initboard(self):
@@ -80,6 +83,9 @@ class GameEnv:
 
             char = self.fen[i]
 
+            if char == ' ':
+                break
+
             if char == '/':
                 i += 1
             elif char.isdigit():
@@ -109,6 +115,9 @@ class GameEnv:
 
                 i += 1
                 val += 1
+
+        if self.fen[len(self.fen) - 1] == 'b':
+            self.movenum = 1
 
     # function to update pieces from their initial positions
     def updatepieces(self):
@@ -177,7 +186,11 @@ if __name__ == "__main__":
 
     letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
 
+    repeat = None
+    draw = 0
+
     env = GameEnv()
+    eval = Eval()
 
     run = True
     clock = pygame.time.Clock()
@@ -189,7 +202,7 @@ if __name__ == "__main__":
 
     check = False
 
-    while run:
+    while run and not draw:
 
         s = ''  # anything with s is only helping with PGN, not important to functionality of code
 
@@ -245,11 +258,11 @@ if __name__ == "__main__":
 
                         if check:
                             s += '+'
-                        
                         env.moves.append(s)
-                        s = ''
 
-                        # check if check has occurred
+                        eval.getfen(env)
+                        draw, repeat = move.repetition(eval.fenstrings, env, repeat) # checking to see if moves are getting repeated
+                        s = ''
 
                     
                     else: # IMPORTANT: ALLOWS PLAYER TO PICK A NEW PIECE

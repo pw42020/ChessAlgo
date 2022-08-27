@@ -43,6 +43,13 @@ def move(initpos, newpos, env, check):
 
         pieces[initpos].nocastle = False # castling has occurred so no more castling
 
+    # getting total pts for either side, important for eval
+    if pieces[initpos].name[0] == 'w':
+        env.total += pieces[newpos].pt
+    else:
+        env.total += pieces[newpos].pt
+
+    # moving piece
     pieces[initpos].coords = newpos
     pieces[newpos] = pieces[initpos]
     del pieces[initpos]
@@ -291,3 +298,32 @@ def findsaveking(piece, env):
         saveking = [piece.coords]
 
     return saveking
+
+# function to see if a repetition is taking place
+def repetition(fenstrings, env, repeat):
+
+    # repeat is [<first time moves started repeating>, <current indices away from that initial repetition>]
+    
+    # if move is not being repeated
+    if fenstrings.count(fenstrings[len(fenstrings) - 1]) == 1:
+        return False, None
+
+    elif (fenstrings.count(fenstrings[len(fenstrings) - 1]) == 3) and (repeat == [fenstrings.index(fenstrings[len(fenstrings) - 1]), repeat[1]]):
+        print("Draw")
+        return True, repeat
+
+    elif fenstrings.count(fenstrings[len(fenstrings) - 1]) > 1:
+        # this is the first piece of the repetition
+        if repeat == None:
+            return False, [fenstrings.index(fenstrings[len(fenstrings) - 1]), 0]
+
+        elif repeat != None:
+
+            # if still repeating
+            if fenstrings[repeat[0] + repeat[1] + 1] == fenstrings[len(fenstrings) - 1]:
+                return False, [repeat[0], repeat[1] + 1]
+
+            # if no longer repeating
+            else:
+                return False, None
+
