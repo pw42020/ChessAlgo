@@ -6,9 +6,10 @@ setup.py is to set up the game using pygame as I'll use tensorflow for ML
 '''
 
 from piece import Piece
+from eval import EvalPosition
 import pygame
 import move as move
-from eval import Eval
+
 
 class GameEnv:
 
@@ -107,17 +108,19 @@ class GameEnv:
                     self.bk = (val%8, val//8)
                 elif char == 'wk':
                     self.wk = (val%8, val//8)
-                
-                img = pygame.image.load("C:\\Users\\Ninja\\OneDrive\\Documents\\GitHub\\ChessAlgo\\Pieces\\"+char+".png")
-                img = pygame.transform.scale(img, (cubew,cubeh))
-
-                self.win.blit(img, ((val%8)*cubew, (val//8)*cubeh))
 
                 i += 1
                 val += 1
 
         if self.fen[len(self.fen) - 1] == 'b':
             self.movenum = 1
+
+    def initimage(self):
+        for coord in self.pieces:
+            img = pygame.image.load("C:\\Users\\Ninja\\OneDrive\\Documents\\GitHub\\ChessAlgo\\Pieces\\"+self.pieces[coord].name+".png")
+            img = pygame.transform.scale(img, (100, 100))
+
+            self.win.blit(img, coord)
 
     # function to update pieces from their initial positions
     def updatepieces(self):
@@ -176,6 +179,69 @@ class GameEnv:
                 self.win.blit(img, (coords[0]*cubew, coords[1]*cubeh))
 
                 uniquelist.append(coords)
+
+# function to evaluate the position based on three factors listed below
+def evalpos(env, pos, check, depth = 2):
+    '''
+    The three parts of evaluating a position
+    part 1: How much material is one person up?
+    part 2: How many spaces does each position attack?
+    part 3: Do the best moves in the position capture material or take up more spaces?
+
+    My goal with looking through the depth to see which move seems like the best move
+    (i.e. which move loses the least amount of material)
+    (with pieces I have all available moves in the position but to get more I'll have to
+    make another env)
+    '''
+
+    eval = EvalPosition()
+
+    p1 = env.total/3
+
+    bestmove = None
+
+    bestinit, bestmove = explorepositions(pos, check, depth)    
+
+
+    return eval, bestinit, bestmove
+
+def explorepositions(pos, check, depth):
+
+    initpos = None
+    bestmove = None
+
+    if depth != 0:
+        depth -= 1
+        for key in env.pieces:
+            piece = env.pieces[key]
+
+            for coord in piece.circles:
+                
+                # setting up subEnvironment
+                subEnv = GameEnv(fen = pos)
+                subEnv.initpiece()
+                subEnv.wk, subEnv.bk = env.wk, env.bk
+
+                subEnv, mate = move.updateAttackMoves(subEnv, check)
+                subEnv, check, mate = move.move(key, coord, subEnv, check)
+                fen = eval.getfen(env)
+
+                a, b = explorepositions(pos, check, depth)
+
+        initpos, bestmove = versus(key, coord, initpos, bestmove)
+
+
+                
+
+    
+
+    return initpos, bestmove
+
+
+def versus(newinit, newmove, bestinit, bestmove):
+    return bestinit, bestmove
+
+
             
 
 
@@ -190,19 +256,23 @@ if __name__ == "__main__":
     draw = 0
 
     env = GameEnv()
-    eval = Eval()
+    eval = EvalPosition()
 
     run = True
     clock = pygame.time.Clock()
 
     env.initpiece() # initializing board and pieces in environment
-    env = move.initAttackMoves(env)
+    env.initimage()
+
+    env, mate = move.updateAttackMoves(env, False)
 
     initpos = None
 
     check = False
 
-    while run and not draw:
+    mate = False
+
+    while run and not draw and not mate:
 
         s = ''  # anything with s is only helping with PGN, not important to functionality of code
 
@@ -260,7 +330,8 @@ if __name__ == "__main__":
                             s += '+'
                         env.moves.append(s)
 
-                        eval.getfen(env)
+                        fen = eval.getfen(env)
+                        evalpos(env, fen, check)
                         draw, repeat = move.repetition(eval.fenstrings, env, repeat) # checking to see if moves are getting repeated
                         s = ''
 

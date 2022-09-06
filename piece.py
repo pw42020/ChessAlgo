@@ -22,7 +22,7 @@ class Piece:
 
     def __init__(self, name, coords):
 
-        pts = {'q': 9, 'p': 1, 'b': 3, 'n': 3, 'r': 5, 'k': 100}
+        pts = {'q': 9, 'p': 1, 'b': 3.2, 'n': 3, 'r': 5, 'k': 100}
         self.pt = pts[name[1]]
 
         self.name = name
@@ -47,9 +47,10 @@ class Piece:
         if not self.pin[2] and not self.pin[3] and not self.pin[0]:
 
             # x direction
-            for i in range(self.coords[0], COLS, 1):
+            ncoords = self.coords
+            while ncoords[0] != 8:
 
-                ncoords = (i+1, self.coords[1])
+                ncoords = (ncoords[0] + 1, ncoords[1])
 
                 if ncoords not in pieces:
                     if len(saveking) != 0 and ncoords in saveking:
@@ -71,10 +72,11 @@ class Piece:
                 elif ncoords in pieces and pieces[ncoords].name[0] == self.name[0]:
                     self.attackMoves.append(ncoords)
                     break
+            
+            ncoords = self.coords
+            while ncoords[0] != 0:
 
-            for i in range(COLS - self.coords[0], COLS, 1):
-
-                ncoords = (COLS - i - 1, self.coords[1])
+                ncoords = (ncoords[0] - 1, ncoords[1])
 
                 if ncoords not in pieces:
                     if len(saveking) != 0 and ncoords in saveking:
@@ -100,9 +102,10 @@ class Piece:
         if not self.pin[2] and not self.pin[3] and not self.pin[1]:
 
             # y direction
-            for i in range(self.coords[1], ROWS, 1):
+            ncoords = self.coords
+            while ncoords[1] != 8:
 
-                ncoords = (self.coords[0], i + 1)
+                ncoords = (ncoords[0], ncoords[1] + 1)
 
                 if ncoords not in pieces:
                     if len(saveking) != 0 and ncoords in saveking:
@@ -124,10 +127,11 @@ class Piece:
                 elif ncoords in pieces and pieces[ncoords].name[0] == self.name[0]:
                     self.attackMoves.append(ncoords)
                     break
+            
+            ncoords = self.coords
+            while ncoords[1] != 0:
 
-            for i in range(ROWS - self.coords[1],ROWS, 1):
-
-                ncoords = (self.coords[0], ROWS - i - 1)
+                ncoords = (ncoords[0], ncoords[1] - 1)
 
                 if ncoords not in pieces:
                     if len(saveking) != 0 and ncoords in saveking:
@@ -165,28 +169,29 @@ class Piece:
             while (ncoords[0] >= 0 and ncoords[1] >= 0):
                 ncoords = (self.coords[0] - i - 1, self.coords[1] - i - 1)
 
-                if ncoords not in pieces:
-                    if len(saveking) != 0 and ncoords in saveking:
-                        self.circles.append(ncoords)
-                        self.attackMoves.append(ncoords)
-                    elif len(saveking) == 0:
-                        self.circles.append(ncoords)
-                        self.attackMoves.append(ncoords)
+                if (ncoords[1] >= 0 and ncoords[1] <= 7) and (ncoords[0] >= 0 and ncoords[0] <= 7):
+                    if ncoords not in pieces:
+                        if len(saveking) != 0 and ncoords in saveking:
+                            self.circles.append(ncoords)
+                            self.attackMoves.append(ncoords)
+                        elif len(saveking) == 0:
+                            self.circles.append(ncoords)
+                            self.attackMoves.append(ncoords)
 
-                elif ncoords in pieces and pieces[ncoords].name[0] != self.name[0]:
-                    if len(saveking) != 0 and ncoords in saveking:
-                        self.circles.append(ncoords)
-                        self.attackMoves.append(ncoords)
-                    elif len(saveking) == 0:
-                        self.circles.append(ncoords)
-                        self.attackMoves.append(ncoords)
-                    break
+                    elif ncoords in pieces and pieces[ncoords].name[0] != self.name[0]:
+                        if len(saveking) != 0 and ncoords in saveking:
+                            self.circles.append(ncoords)
+                            self.attackMoves.append(ncoords)
+                        elif len(saveking) == 0:
+                            self.circles.append(ncoords)
+                            self.attackMoves.append(ncoords)
+                        break
 
-                elif ncoords in pieces and pieces[ncoords].name[0] == self.name[0]:
-                    self.attackMoves.append(ncoords)
-                    break
-                    
-                i += 1
+                    elif ncoords in pieces and pieces[ncoords].name[0] == self.name[0]:
+                        self.attackMoves.append(ncoords)
+                        break
+                        
+                    i += 1
 
             ncoords = self.coords
 
@@ -194,28 +199,29 @@ class Piece:
             while (ncoords[0] <= 7 and ncoords[1] <= 7):
                 ncoords = (self.coords[0] + l + 1, self.coords[1] + l + 1)
                 
-                if ncoords not in pieces:
-                    if len(saveking) != 0 and ncoords in saveking:
-                        self.circles.append(ncoords)
-                        self.attackMoves.append(ncoords)
-                    elif len(saveking) == 0:
-                        self.circles.append(ncoords)
-                        self.attackMoves.append(ncoords)
+                if (ncoords[1] >= 0 and ncoords[1] <= 7) and (ncoords[0] >= 0 and ncoords[0] <= 7):
+                    if ncoords not in pieces:
+                        if len(saveking) != 0 and ncoords in saveking:
+                            self.circles.append(ncoords)
+                            self.attackMoves.append(ncoords)
+                        elif len(saveking) == 0:
+                            self.circles.append(ncoords)
+                            self.attackMoves.append(ncoords)
 
-                elif ncoords in pieces and pieces[ncoords].name[0] != self.name[0]:
-                    if len(saveking) != 0 and ncoords in saveking:
-                        self.circles.append(ncoords)
-                        self.attackMoves.append(ncoords)
-                    elif len(saveking) == 0:
-                        self.circles.append(ncoords)
-                        self.attackMoves.append(ncoords)
-                    break
+                    elif ncoords in pieces and pieces[ncoords].name[0] != self.name[0]:
+                        if len(saveking) != 0 and ncoords in saveking:
+                            self.circles.append(ncoords)
+                            self.attackMoves.append(ncoords)
+                        elif len(saveking) == 0:
+                            self.circles.append(ncoords)
+                            self.attackMoves.append(ncoords)
+                        break
 
-                elif ncoords in pieces and pieces[ncoords].name[0] == self.name[0]:
-                    self.attackMoves.append(ncoords)
-                    break
+                    elif ncoords in pieces and pieces[ncoords].name[0] == self.name[0]:
+                        self.attackMoves.append(ncoords)
+                        break
                     
-                l += 1    
+                    l += 1    
             
         if not (self.pin[0] or self.pin[1] or self.pin[3]):
 
@@ -225,28 +231,29 @@ class Piece:
             while (ncoords[0] <= 7 and ncoords[1] >= 0):
                 ncoords = (self.coords[0] + k + 1, self.coords[1] - k - 1)
                 
-                if ncoords not in pieces:
-                    if len(saveking) != 0 and ncoords in saveking:
-                        self.circles.append(ncoords)
-                        self.attackMoves.append(ncoords)
-                    elif len(saveking) == 0:
-                        self.circles.append(ncoords)
-                        self.attackMoves.append(ncoords)
+                if (ncoords[1] >= 0 and ncoords[1] <= 7) and (ncoords[0] >= 0 and ncoords[0] <= 7):
+                    if ncoords not in pieces:
+                        if len(saveking) != 0 and ncoords in saveking:
+                            self.circles.append(ncoords)
+                            self.attackMoves.append(ncoords)
+                        elif len(saveking) == 0:
+                            self.circles.append(ncoords)
+                            self.attackMoves.append(ncoords)
 
-                elif ncoords in pieces and pieces[ncoords].name[0] != self.name[0]:
-                    if len(saveking) != 0 and ncoords in saveking:
-                        self.circles.append(ncoords)
-                        self.attackMoves.append(ncoords)
-                    elif len(saveking) == 0:
-                        self.circles.append(ncoords)
-                        self.attackMoves.append(ncoords)
-                    break
+                    elif ncoords in pieces and pieces[ncoords].name[0] != self.name[0]:
+                        if len(saveking) != 0 and ncoords in saveking:
+                            self.circles.append(ncoords)
+                            self.attackMoves.append(ncoords)
+                        elif len(saveking) == 0:
+                            self.circles.append(ncoords)
+                            self.attackMoves.append(ncoords)
+                        break
 
-                elif ncoords in pieces and pieces[ncoords].name[0] == self.name[0]:
-                    self.attackMoves.append(ncoords)
-                    break
+                    elif ncoords in pieces and pieces[ncoords].name[0] == self.name[0]:
+                        self.attackMoves.append(ncoords)
+                        break
                     
-                k += 1
+                    k += 1
 
             ncoords = self.coords
 
@@ -254,28 +261,29 @@ class Piece:
             while (ncoords[0] >= 0 and ncoords[1] <= 7):
                 ncoords = (self.coords[0] - j - 1, self.coords[1] + j + 1)
                 
-                if ncoords not in pieces:
-                    if len(saveking) == 0:
-                        self.circles.append(ncoords)
-                        self.attackMoves.append(ncoords)
-                    else:
-                        if ncoords in saveking:
+                if (ncoords[1] >= 0 and ncoords[1] <= 7) and (ncoords[0] >= 0 and ncoords[0] <= 7):
+                    if ncoords not in pieces:
+                        if len(saveking) != 0 and ncoords in saveking:
                             self.circles.append(ncoords)
+                            self.attackMoves.append(ncoords)
+                        elif len(saveking) == 0:
+                            self.circles.append(ncoords)
+                            self.attackMoves.append(ncoords)
 
-                elif ncoords in pieces and pieces[ncoords].name[0] != self.name[0]:
-                    if len(saveking) != 0 and ncoords in saveking:
-                        self.circles.append(ncoords)
-                        self.attackMoves.append(ncoords)
-                    elif len(saveking) == 0:
-                        self.circles.append(ncoords)
-                        self.attackMoves.append(ncoords)
-                    break
+                    elif ncoords in pieces and pieces[ncoords].name[0] != self.name[0]:
+                        if len(saveking) != 0 and ncoords in saveking:
+                            self.circles.append(ncoords)
+                            self.attackMoves.append(ncoords)
+                        elif len(saveking) == 0:
+                            self.circles.append(ncoords)
+                            self.attackMoves.append(ncoords)
+                        break
 
-                elif ncoords in pieces and pieces[ncoords].name[0] == self.name[0]:
-                    self.attackMoves.append(ncoords)
-                    break
+                    elif ncoords in pieces and pieces[ncoords].name[0] == self.name[0]:
+                        self.attackMoves.append(ncoords)
+                        break
                     
-                j += 1
+                    j += 1
 
     def l(self, pieces, saveking = []):
         self.circles = []

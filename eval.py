@@ -1,8 +1,8 @@
+import move as move
+import copy
 
 
-
-
-class Eval:
+class EvalPosition:
 
     def __init__(self):
         self.fenstrings = []
@@ -37,14 +37,23 @@ class Eval:
                 fenstr += str(space)
                 space = 0
             
-            if env.movenum % 2 == 0:
-                fenstr += ' w'
-            elif env.movenum % 2 == 1:
-                fenstr += ' b'
+        if env.movenum % 2 == 0:
+            fenstr += ' w'
+        elif env.movenum % 2 == 1:
+            fenstr += ' b'
         
         self.fenstrings.append(fenstr)
 
         return fenstr
-                
-    def evalpos(self,env, pieces):
-        pass
+    
+
+
+
+
+            
+
+
+
+
+
+
