@@ -8,6 +8,7 @@ setup.py is to set up the game using pygame as I'll use tensorflow for ML
 from piece import Piece
 from eval import EvalPosition
 import pygame
+import pygame_menu
 import move as move
 
 
@@ -180,85 +181,11 @@ class GameEnv:
 
                 uniquelist.append(coords)
 
-# function to evaluate the position based on three factors listed below
-def evalpos(env, pos, check, depth = 2):
-    '''
-    The three parts of evaluating a position
-    part 1: How much material is one person up?
-    part 2: How many spaces does each position attack?
-    part 3: Do the best moves in the position capture material or take up more spaces?
 
-    My goal with looking through the depth to see which move seems like the best move
-    (i.e. which move loses the least amount of material)
-    (with pieces I have all available moves in the position but to get more I'll have to
-    make another env)
-    '''
-
-    eval = EvalPosition()
-
-    p1 = env.total/3
-
-    bestmove = None
-
-    bestinit, bestmove = explorepositions(pos, check, depth)    
-
-
-    return eval, bestinit, bestmove
-
-def explorepositions(pos, check, depth):
-
-    initpos = None
-    bestmove = None
-
-    if depth != 0:
-        depth -= 1
-        for key in env.pieces:
-            piece = env.pieces[key]
-
-            for coord in piece.circles:
-                
-                # setting up subEnvironment
-                subEnv = GameEnv(fen = pos)
-                subEnv.initpiece()
-                subEnv.wk, subEnv.bk = env.wk, env.bk
-
-                subEnv, mate = move.updateAttackMoves(subEnv, check)
-                subEnv, check, mate = move.move(key, coord, subEnv, check)
-                fen = eval.getfen(env)
-
-                a, b = explorepositions(pos, check, depth)
-
-        initpos, bestmove = versus(key, coord, initpos, bestmove)
-
-
-                
-
-    
-
-    return initpos, bestmove
-
-
-def versus(newinit, newmove, bestinit, bestmove):
-    return bestinit, bestmove
-
-
-            
-
-
-# after initpiece() initializes with self.fen, the pieces automate themselves and are refreshed remembering on where they
-# used to be using their coordinates
-
-if __name__ == "__main__":
-
-    letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
-
-    repeat = None
-    draw = 0
-
+def gameloop():
     env = GameEnv()
     eval = EvalPosition()
 
-    run = True
     clock = pygame.time.Clock()
 
     env.initpiece() # initializing board and pieces in environment
@@ -267,12 +194,14 @@ if __name__ == "__main__":
     env, mate = move.updateAttackMoves(env, False)
 
     initpos = None
+    repeat = 0
 
     check = False
 
     mate = False
-
-    while run and not draw and not mate:
+    draw = False
+    
+    while not draw and not mate:
 
         s = ''  # anything with s is only helping with PGN, not important to functionality of code
 
@@ -331,7 +260,7 @@ if __name__ == "__main__":
                         env.moves.append(s)
 
                         fen = eval.getfen(env)
-                        evalpos(env, fen, check)
+                        #evalpos(env, fen, check)
                         draw, repeat = move.repetition(eval.fenstrings, env, repeat) # checking to see if moves are getting repeated
                         s = ''
 
@@ -348,8 +277,46 @@ if __name__ == "__main__":
                         env.move((x,y))
 
         pygame.display.update()
+    
+    #game has finished
+    s = ''
+    if mate:
+        s = "Checkmate!"
+    else:
+        s = "Draw!"
+    
+    pygame.display.update()
+    
+    menu = pygame_menu.Menu(s, 400, 300, theme=pygame_menu.themes.THEME_BLUE)
+    menu.add.button("Play Again", gameloop)
+    menu.add.button("Quit", pygame.quit)
+
+    menu.mainloop(env.win)
+
+    pygame.display.update()
+
             
-    pygame.quit()
+
+
+# after initpiece() initializes with self.fen, the pieces automate themselves and are refreshed remembering on where they
+# used to be using their coordinates
+
+if __name__ == "__main__":
+
+    letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+
+    run = True
+    
+
+    while run:
+        
+        s, env = gameloop()
+
+        
+
+    
+
+            
 
     print('PGN of game:')
 
